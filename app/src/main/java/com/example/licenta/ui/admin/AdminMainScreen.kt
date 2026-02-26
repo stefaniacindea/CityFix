@@ -16,10 +16,7 @@ import com.example.licenta.data.Report
 import com.example.licenta.data.ReportStatus
 import com.example.licenta.viewmodel.AdminReportsViewModel
 import com.example.licenta.viewmodel.ReportsState
-import java.text.SimpleDateFormat
-import java.util.Locale
 
-private val dateFormat = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault())
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
