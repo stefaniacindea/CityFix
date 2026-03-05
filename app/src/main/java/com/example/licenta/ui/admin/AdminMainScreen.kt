@@ -84,7 +84,7 @@ fun AdminReportCard(report: Report, onStatusChange: (reportId: String, newStatus
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            Divider()
+            HorizontalDivider()
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(

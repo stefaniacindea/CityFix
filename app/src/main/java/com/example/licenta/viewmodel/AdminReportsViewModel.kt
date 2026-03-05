@@ -12,7 +12,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.example.licenta.viewmodel.ReportsStat
+import com.example.licenta.viewmodel.ReportsState
 
 
 class AdminReportsViewModel : ViewModel() {
