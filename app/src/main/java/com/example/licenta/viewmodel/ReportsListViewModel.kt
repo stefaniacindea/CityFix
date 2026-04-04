@@ -54,14 +54,13 @@ class ReportsListViewModel : ViewModel() {
                             lon = (locationObject["lon"] as? Number)?.toDouble() ?: 0.0
                         )
                     } else LocationData()
-                    // ------------------------------------------------
 
                     Report(
                         id = document.id,
                         userId = document.getString("userId") ?: "",
                         reportName = document.getString("reportName") ?: "Necunoscut",
                         description = document.getString("description") ?: "",
-                        location = locationData, // Folosim datele corect mapate
+                        location = locationData,
                         imageUrl = document.getString("imageUrl"),
                         timestamp = document.getTimestamp("timestamp") ?: Timestamp.now(),
                         status = document.getString("status") ?: "Pending"

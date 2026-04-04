@@ -92,6 +92,3 @@ class ReportViewModel : ViewModel() {
             }
     }
 }
-
-sealed class ReportAction {
-}

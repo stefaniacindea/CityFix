@@ -16,6 +16,7 @@ import com.example.licenta.data.Report
 import com.example.licenta.data.ReportStatus
 import com.example.licenta.viewmodel.AdminReportsViewModel
 import com.example.licenta.viewmodel.ReportsState
+import com.google.firebase.auth.FirebaseAuth
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,8 +26,17 @@ fun AdminMainScreen(
 ) {
     val reportsState by adminViewModel.reportsState.collectAsState()
 
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val email = currentUser?.email ?: ""
+    val numeUtilizator = if (email.isNotEmpty()) {
+        email.substringBefore("@").replaceFirstChar { it.uppercase() }
+    } else {
+        "Admin"
+    }
+
+
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Panoul de Administrare (Toate Sesizările)") }) }
+        topBar = { TopAppBar(title = { Text("Bună ziua, $numeUtilizator!") }) }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
 
@@ -47,12 +57,11 @@ fun AdminMainScreen(
                             Text("Nu există sesizări trimise.")
                         }
                     } else {
-                        // Afișează lista tuturor rapoartelor
                         LazyColumn(contentPadding = PaddingValues(16.dp)) {
                             items(state.reports) { report ->
                                 AdminReportCard(
                                     report = report,
-                                    onStatusChange = adminViewModel::updateReportStatus // Trimite funcția de actualizare
+                                    onStatusChange = adminViewModel::updateReportStatus
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                             }
