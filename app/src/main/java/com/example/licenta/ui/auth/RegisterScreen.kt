@@ -1,4 +1,4 @@
-package com.example.licenta.ui.auth
+package com.example.licenta.ui.auth // Verifică să ai pachetul corect
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,9 +19,9 @@ import com.example.licenta.viewmodel.AuthState
 import com.example.licenta.viewmodel.AuthViewModel
 
 @Composable
-fun AuthScreen(
+fun RegisterScreen(
     onSuccessNavigation: (User) -> Unit,
-    onNavigateToRegister: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     authViewModel: AuthViewModel = viewModel()
 ) {
     val authState by authViewModel.authState.collectAsState()
@@ -30,7 +30,6 @@ fun AuthScreen(
     var password by remember { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         Image(
             painter = painterResource(id = R.drawable.road),
             contentDescription = "Fundal Oraș",
@@ -51,18 +50,11 @@ fun AuthScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-
             Text(
-                text = "CityFix",
+                text = "Creare Cont",
                 style = MaterialTheme.typography.displayMedium,
                 color = Color.White
             )
-            Text(
-                text = "Raportează probleme în orașul tău",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White.copy(alpha = 0.8f)
-            )
-
             Spacer(modifier = Modifier.height(40.dp))
 
             Card(
@@ -91,14 +83,14 @@ fun AuthScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Button(
-                        onClick = { authViewModel.signIn(email, password) },
+                        onClick = { authViewModel.signUp(email, password) },
                         enabled = authState != AuthState.Loading,
                         modifier = Modifier.fillMaxWidth().height(50.dp)
                     ) {
                         if (authState == AuthState.Loading) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
                         } else {
-                            Text("Autentificare")
+                            Text("Înregistrare")
                         }
                     }
 
@@ -109,19 +101,9 @@ fun AuthScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Nu ai un cont?",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        TextButton(
-                            onClick = onNavigateToRegister,
-                            enabled = authState != AuthState.Loading
-                        ) {
-                            Text(
-                                text = "Înregistrează-te",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                        Text("Ai deja cont?", style = MaterialTheme.typography.bodyMedium)
+                        TextButton(onClick = onNavigateToLogin) {
+                            Text("Autentifică-te", color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }

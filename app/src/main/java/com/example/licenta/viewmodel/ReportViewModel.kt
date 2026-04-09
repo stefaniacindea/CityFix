@@ -91,4 +91,7 @@ class ReportViewModel : ViewModel() {
                 _reportState.value = ReportState.Failure("Eroare la salvarea în baza de date: ${e.message}")
             }
     }
+    fun resetState() {
+        _reportState.value = ReportState.Idle
+    }
 }

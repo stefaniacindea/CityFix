@@ -3,13 +3,17 @@ package com.example.licenta.ui.citizen
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.licenta.data.Report
 import com.example.licenta.data.ReportStatus
 import com.example.licenta.viewmodel.ReportsListViewModel
@@ -72,9 +76,24 @@ fun ReportCard(report: Report) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = report.description.take(50) + "...",
+                text = report.description,
                 style = MaterialTheme.typography.bodyMedium
             )
+
+            if (!report.imageUrl.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                AsyncImage(
+                    model = report.imageUrl,
+                    contentDescription = "Poză atașată de utilizator",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Trimis la: ${dateFormat.format(report.timestamp.toDate())}",
                 style = MaterialTheme.typography.bodySmall,

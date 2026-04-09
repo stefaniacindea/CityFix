@@ -4,14 +4,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.licenta.data.Report
 import com.example.licenta.data.ReportStatus
 import com.example.licenta.viewmodel.AdminReportsViewModel
@@ -75,12 +79,29 @@ fun AdminMainScreen(
 
 @Composable
 fun AdminReportCard(report: Report, onStatusChange: (reportId: String, newStatus: String) -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().clickable { /* TODO: Navigare la vizualizarea hărții */ }) {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
 
             Text(text = "${report.reportName} (ID: ${report.id.take(6)})", style = MaterialTheme.typography.titleLarge)
             Text(text = "De la: ${report.userId.take(8)}...", style = MaterialTheme.typography.bodySmall)
+
             Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Descriere: ${report.description}", style = MaterialTheme.typography.bodyMedium)
+
+            if (!report.imageUrl.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                AsyncImage(
+                    model = report.imageUrl,
+                    contentDescription = "Dovada foto",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             val statusColor = when (report.status) {
                 ReportStatus.RESOLVED -> MaterialTheme.colorScheme.primary

@@ -16,9 +16,12 @@ import com.example.licenta.ui.citizen.CitizenMainScreen
 import com.example.licenta.viewmodel.AuthViewModel
 import com.example.licenta.ui.citizen.ReportDetailScreen
 import com.example.licenta.ui.citizen.MyReportsScreen
+import com.example.licenta.ui.auth.RegisterScreen
 
 sealed class Screen(val route: String) {
     object Auth : Screen("auth_screen")
+
+    object Register : Screen("register_screen")
     object CitizenMain : Screen("citizen_main_screen")
     object AdminMain : Screen("admin_main_screen")
     object CategorySelection : Screen("category_selection_screen")
@@ -52,6 +55,21 @@ fun AppNavigation(
                 authViewModel = authViewModel,
                 onSuccessNavigation = { user ->
                     navigateBasedOnRole(user)
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register.route)
+                }
+            )
+        }
+
+        composable(Screen.Register.route) {
+            RegisterScreen(
+                authViewModel = authViewModel,
+                onSuccessNavigation = { user ->
+                    navigateBasedOnRole(user)
+                },
+                onNavigateToLogin = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -84,7 +102,12 @@ fun AppNavigation(
 
             ReportDetailScreen(
                 reportName = reportName,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onSuccessNavigate = {
+                    navController.navigate(Screen.MyReports.route) {
+                        popUpTo(Screen.CitizenMain.route)
+                    }
+                }
             )
         }
 

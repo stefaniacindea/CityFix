@@ -7,6 +7,7 @@ import com.example.licenta.data.User
 import com.example.licenta.data.UserRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import com.google.firebase.messaging.FirebaseMessaging
 
 sealed class AuthState {
     object Idle : AuthState()
@@ -29,6 +30,11 @@ class AuthViewModel : ViewModel() {
             return
         }
 
+        if (email.trim().endsWith(ADMIN_DOMAIN, ignoreCase = true)) {
+            _authState.value = AuthState.Failure("Nu se pot crea conturi noi cu domeniu de administrator.")
+            return
+        }
+
         _authState.value = AuthState.Loading
 
         auth.createUserWithEmailAndPassword(email, password)
@@ -44,30 +50,31 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-
     private fun saveUserRole(uid: String, email: String) {
+        val roleToAssign = UserRole.CITIZEN
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
+            val proaspatToken = if (tokenTask.isSuccessful) tokenTask.result else null
 
-        val roleToAssign = if (email.endsWith(ADMIN_DOMAIN, ignoreCase = true)) {
-            UserRole.ADMIN
-        } else {
-            UserRole.CITIZEN
+            val userMap = hashMapOf<String, Any>(
+                "email" to email,
+                "role" to roleToAssign
+            )
+
+            if (proaspatToken != null) {
+                userMap["fcmToken"] = proaspatToken
+            }
+
+            firestore.collection("users")
+                .document(uid)
+                .set(userMap)
+                .addOnSuccessListener {
+                    val newUser = User(uid = uid, email = email, role = roleToAssign)
+                    _authState.value = AuthState.Success(newUser, "Înregistrare reușită!")
+                }
+                .addOnFailureListener { e ->
+                    _authState.value = AuthState.Failure("Înregistrare reușită, dar salvarea profilului a eșuat.")
+                }
         }
-
-        val userMap = hashMapOf(
-            "email" to email,
-            "role" to roleToAssign
-        )
-
-        firestore.collection("users")
-            .document(uid)
-            .set(userMap)
-            .addOnSuccessListener {
-                val newUser = User(uid = uid, email = email, role = roleToAssign)
-                _authState.value = AuthState.Success(newUser, "Înregistrare reușită!")
-            }
-            .addOnFailureListener { e ->
-                _authState.value = AuthState.Failure("Înregistrare reușită, dar salvarea rolului a eșuat.")
-            }
     }
 
     fun signIn(email: String, password: String) {
@@ -90,16 +97,25 @@ class AuthViewModel : ViewModel() {
 
 
     private fun fetchUserRole(uid: String, email: String) {
-        firestore.collection("users").document(uid).get()
-            .addOnSuccessListener { document ->
-                val role = document.getString("role") ?: UserRole.CITIZEN
-                val loggedInUser = User(uid = uid, email = email, role = role)
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
+            val proaspatToken = if (tokenTask.isSuccessful) tokenTask.result else null
 
-                _authState.value = AuthState.Success(loggedInUser, "Login reușit!")
-            }
-            .addOnFailureListener {
-                _authState.value = AuthState.Failure("Login reușit, dar rolul nu a putut fi citit.")
-            }
+            firestore.collection("users").document(uid).get()
+                .addOnSuccessListener { document ->
+                    val role = document.getString("role") ?: UserRole.CITIZEN
+
+                    if (proaspatToken != null) {
+                        firestore.collection("users").document(uid)
+                            .update("fcmToken", proaspatToken)
+                    }
+
+                    val loggedInUser = User(uid = uid, email = email, role = role)
+                    _authState.value = AuthState.Success(loggedInUser, "Login reușit!")
+                }
+                .addOnFailureListener {
+                    _authState.value = AuthState.Failure("Eroare la citirea profilului.")
+                }
+        }
     }
     fun resetState() {
         _authState.value = AuthState.Idle

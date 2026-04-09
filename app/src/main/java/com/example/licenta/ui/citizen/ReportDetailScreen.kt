@@ -33,6 +33,7 @@ import com.google.maps.android.compose.*
 fun ReportDetailScreen(
     reportName: String,
     onBack: () -> Unit,
+    onSuccessNavigate: () -> Unit,
     reportViewModel: ReportViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -49,6 +50,15 @@ fun ReportDetailScreen(
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
     val reportState by reportViewModel.reportState.collectAsState()
+
+    LaunchedEffect(reportState) {
+        if (reportState is ReportState.Success) {
+            android.widget.Toast.makeText(context, "Sesizarea a fost trimisă cu succes!", android.widget.Toast.LENGTH_SHORT).show()
+            kotlinx.coroutines.delay(300)
+            reportViewModel.resetState()
+            onSuccessNavigate()
+        }
+    }
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -67,8 +77,8 @@ fun ReportDetailScreen(
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                         if (location != null) {
                             val currentLatLng = LatLng(location.latitude, location.longitude)
-                            markerPosition = currentLatLng // Mutăm pin-ul
-                            cameraPositionState.position = CameraPosition.fromLatLngZoom(currentLatLng, 15f) // Mutăm harta
+                            markerPosition = currentLatLng
+                            cameraPositionState.position = CameraPosition.fromLatLngZoom(currentLatLng, 15f)
                         }
                     }
                 } catch (e: SecurityException) { e.printStackTrace() }
@@ -169,14 +179,12 @@ fun ReportDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(24.dp))
 
-                when (val state = reportState) {
-                    is ReportState.Success -> {
-                        Text(state.message, color = MaterialTheme.colorScheme.primary)
-                    }
-                    is ReportState.Failure -> {
-                        Text(state.error, color = MaterialTheme.colorScheme.error)
-                    }
-                    else -> Unit
+                if (reportState is ReportState.Failure) {
+                    Text(
+                        text = (reportState as ReportState.Failure).error,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                 }
 
                 Button(
