@@ -1,24 +1,23 @@
-# CityFix
+# CityFix 🏙️
 
-A modern Android application designed to facilitate communication between citizens and the local administration. CityFix is a "Smart City" solution that allows users to quickly report urban infrastructure issues (e.g., potholes, broken streetlights) using real-time geolocation and photographic evidence. 
+CityFix is an Android application I developed for my Bachelor's degree thesis. It helps citizens easily report problems in their city (like potholes, broken streetlights, or damaged benches) directly to the local administration.
 
-The application features a role-based system, providing a dedicated dashboard for administrators to manage and update the status of incoming reports, while keeping citizens informed through automated updates.
+Instead of going to the city hall or making phone calls, a user can just take a photo of the issue, and the app automatically grabs the exact GPS location. 
 
-### ⚙️ Tech Stack
+The app has a role-based system with two types of accounts:
+* **Citizens:** Can send reports and see the history and status of their own submissions.
+* **Administrators (City Hall):** Have a dedicated dashboard to see all incoming reports from the city and update their status ("Pending", "In Progress", or "Resolved").
 
+### 🛠️ Tech Stack I Used
 * **Language:** Kotlin
-* **UI Toolkit:** Jetpack Compose
-* **Architecture:** MVVM (Model-View-ViewModel)
-* **Backend as a Service (BaaS):** Google Firebase
-  * *Authentication:* Secure role-based login (Citizen/Admin)
-  * *Database:* Cloud Firestore (NoSQL real-time database)
-  * *Storage:* Firebase Storage (for uploading image evidence)
-  * *Notifications:* Firebase Cloud Messaging (FCM)
-* **Location Services:** Google Maps Platform SDK (Fused Location)
+* **UI:** Jetpack Compose
+* **Architecture:** MVVM
+* **Backend:** Google Firebase (Authentication, Firestore for database, Storage for images, and Cloud Messaging for push notifications)
+* **Maps & Location:** Google Maps Platform SDK
 * **Image Loading:** Coil
 
-### ✨ Key Features
-* Secure authentication with distinct Citizen and Admin roles.
-* Interactive map integration for precise incident geolocation.
-* Camera/Gallery integration for attaching visual evidence.
-* Real-time dashboard for authorities to track and update issue statuses (Pending, In Progress, Resolved).
+### ✨ Main Features
+* Secure Login/Register system that automatically detects the user's role.
+* Interactive Google Maps integration to pinpoint the exact location of the problem.
+* Uploading photos straight from the camera or gallery.
+* Real-time dashboard for admins to manage the reports.
