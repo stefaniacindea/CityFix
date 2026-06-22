@@ -81,6 +81,12 @@ fun AppNavigation(
                 },
                 onNavigateToMyReports = {
                     navController.navigate(Screen.MyReports.route)
+                },
+                onLogOutSuccess = {
+                    authViewModel.resetState()
+                    navController.navigate(Screen.Auth.route){
+                        popUpTo(0){inclusive = true}
+                    }
                 }
             )
         }

@@ -45,23 +45,32 @@ class AuthViewModel : ViewModel() {
                         saveUserRole(it.uid, email)
                     }
                 } else {
-                    _authState.value = AuthState.Failure(task.exception?.message ?: "Eroare la înregistrare.")
-                }
+                    val errorMessage = when (val exception = task.exception) {
+                        is com.google.firebase.auth.FirebaseAuthUserCollisionException ->
+                            "Acest email este deja folosit pentru un alt cont."
+                        is com.google.firebase.auth.FirebaseAuthWeakPasswordException ->
+                            "Parola este prea slabă (trebuie să aibă minim 6 caractere)."
+                        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException ->
+                            "Adresa de email nu are un format valid."
+                        else ->
+                            "Eroare la înregistrare: ${exception?.message ?: "Încearcă din nou."}"
+                    }
+                    _authState.value = AuthState.Failure(errorMessage)                }
             }
     }
 
     private fun saveUserRole(uid: String, email: String) {
         val roleToAssign = UserRole.CITIZEN
         FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
-            val proaspatToken = if (tokenTask.isSuccessful) tokenTask.result else null
+            val fetchedToken = if (tokenTask.isSuccessful) tokenTask.result else null
 
             val userMap = hashMapOf<String, Any>(
                 "email" to email,
                 "role" to roleToAssign
             )
 
-            if (proaspatToken != null) {
-                userMap["fcmToken"] = proaspatToken
+            if (fetchedToken != null) {
+                userMap["fcmToken"] = fetchedToken
             }
 
             firestore.collection("users")
@@ -90,23 +99,29 @@ class AuthViewModel : ViewModel() {
                     val uid = task.result?.user?.uid ?: return@addOnCompleteListener
                     fetchUserRole(uid, email)
                 } else {
-                    _authState.value = AuthState.Failure(task.exception?.message ?: "Eroare la autentificare.")
-                }
+                    val errorMessage = when (task.exception) {
+                        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException,
+                        is com.google.firebase.auth.FirebaseAuthInvalidUserException ->
+                            "Datele introduse sunt incorecte (email sau parolă greșită)."
+                        else ->
+                            "Eroare la autentificare. Te rugăm să încerci din nou."
+                    }
+                    _authState.value = AuthState.Failure(errorMessage)                }
             }
     }
 
 
     private fun fetchUserRole(uid: String, email: String) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
-            val proaspatToken = if (tokenTask.isSuccessful) tokenTask.result else null
+            val fetchedToken = if (tokenTask.isSuccessful) tokenTask.result else null
 
             firestore.collection("users").document(uid).get()
                 .addOnSuccessListener { document ->
                     val role = document.getString("role") ?: UserRole.CITIZEN
 
-                    if (proaspatToken != null) {
+                    if (fetchedToken != null) {
                         firestore.collection("users").document(uid)
-                            .update("fcmToken", proaspatToken)
+                            .update("fcmToken", fetchedToken)
                     }
 
                     val loggedInUser = User(uid = uid, email = email, role = role)
@@ -119,5 +134,8 @@ class AuthViewModel : ViewModel() {
     }
     fun resetState() {
         _authState.value = AuthState.Idle
+    }
+    fun logOut(){
+        FirebaseAuth.getInstance().signOut();
     }
 }
